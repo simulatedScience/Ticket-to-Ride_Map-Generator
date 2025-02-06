@@ -88,15 +88,15 @@ class Graph_Particle:
   #   if repulsion_strength is not None:
   #     self.repulsion_strength = repulsion_strength
 
-  def set_connected_particles(self, particles: List["Graph_Particle"]):
+  def set_connected_particles(self, particles: list["Graph_Particle"]):
     """
     Set the particles that this particle is connected to.
     There is an attraction force between the particle and each of its connected particles. This attraction force is calculated in the `interact` method and is not symmetric. For example a node can attract a label, but the label may not attract the node.
 
     args:
-      particles (List[Graph_Particle]): list of particles that this particle is connected to
+      particles (list[Graph_Particle]): list of particles that this particle is connected to
     """
-    self.connected_particles = particles
+    self.connected_particles: list["Graph_Particle"] = particles
 
 
   def add_connected_particle(self, particle: "Graph_Particle"):
@@ -113,13 +113,13 @@ class Graph_Particle:
       self.connected_particles.append(particle)
 
 
-  def set_neighbors(self, neighbors: List["Graph_Particle"]):
+  def set_neighbors(self, neighbors: list["Graph_Particle"]):
     """
     Set the neighbors of this particle.
     This is used for the Verlet list algorithm.
 
     args:
-      neighbors (List[Graph_Particle]): list of neighbors of this particle
+      neighbors (list[Graph_Particle]): list of neighbors of this particle
     """
     self.neighbors = neighbors
 
@@ -130,7 +130,7 @@ class Graph_Particle:
     This is used for the Verlet list algorithm.
 
     returns:
-      (List[Graph_Particle]): list of neighbors of this particle
+      (list[Graph_Particle]): list of neighbors of this particle
     """
     return self.neighbors
 

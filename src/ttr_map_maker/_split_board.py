@@ -377,7 +377,8 @@ if __name__ == "__main__":
         "total_board_height":  394, # in mm
         "outer_margin":  2, # in mm
         "inner_margin":  1, # in mm
-        "output_prefix":  "Harry_Potter_v2.4.3",
+        # "output_prefix":  "Harry_Potter_v2.4.3",
+        "output_prefix":  "Star_Wars_v1.1",
     }
     main(
         **harry_potter_star_wars_board_settings)
