@@ -22,6 +22,11 @@ src/tickets_ai-modulated_delay
 *.png
 *.png
 
+# keep doc images
+!doc/**
+doc/circle_intersection_visualisation.png
+doc/a4_printable_area.png
+
 # keep some examples
 !projects/**/
 !projects/example_project/**

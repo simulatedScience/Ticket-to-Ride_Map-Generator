@@ -12,7 +12,19 @@ The labels are separate objects that are created automatically for each node and
 
 To save progress, the program uses human-readable .json files. You can edit these manually - occasionally that's faster than using the GUI, but you can also break things.
 
-Pressing F11 enters fullscreen mode.
+
+### Keyboard shortcuts:
+* Pressing F11 enters fullscreen mode.
+* On many buttons where you choose between mutliple options, you can use the scroll wheel to quickly switch between options. This includes location selection for tasks and edges, edge color, edge length and more.
+
+### What you need beyond this program:
+* A background image for your map.
+  * A score track
+  * a legend to tell players how many points they earn for each edge they built
+* physical materials
+  * a printer to print the board and task cards
+  * cards (e.g. Pokémon energy cards)
+  * train pieces (e.g. 1x3 or 1x4 LEGO bricks)
 
 ## The sidebar menu
 ### GUI modes
@@ -59,17 +71,23 @@ This sections modifies the viewport:
   * **label font:** Here, you can specify a font (.ttf file path) to use for location labels and task card texts.
   * **label size:** Adjusts the font size used for location labels. Text size on task cards is separately defined in the task export mode.
 
+## The viewport
+If you've ever used matplotlib diagrams, The controls in the bottom left will be familiar - they are the same.
+* The home button resets the view to the default position and zoom level.
+* The left and right arrow buttons undo and redo your last view changes.
+* Use the magnifying glass to zoom in and out. With left click, you can drag a rectangle to zoom in. With right click, you can drag a rectangle to zoom out.
+* Use the four arrows to pan the view.
+* The configure subplots button opens a menu where you can change the spacing between subplots (e.g. for the Graph analysis mode). You almost certainly won't need this.
+* The save button can be used to save the current view as an image, but the resolution of that image will depend on your screen resolution, how much you zoom in and include more area than you may want. The intended way to export is the "Save img" button in the sidebar menu. This also exports the current view but does so hat higher resolution and with more suitable default settings.
+* The bottom right corner shows the coordinates of the tip of your mouse cursor. If you hover over an image, it also shows the RGBA color values of the pixel under the cursor. Sometimes this appears with values between 0 and 1, sometimes between 0 and 255.
+
 # Starting a project
-recommendation: create a project folder for your new map:
+recommendation: create a new project folder for your new map:
 ```
 src
 doc
 projects
-|- TTR-Pokémon
-   |- mapmaker files
-   |- reference images
-   |- edge images
-|- TTR-middle earth
+|- example_project
    |- mapmaker files
    |- reference images
    |- edge images
@@ -95,10 +113,40 @@ This is a legacy workflow that may not work perfectly anymore. Paths (=edges) as
 
 Load locations first, then paths and tasks, each via the specific load buttons in the GUI, located underneath the large "Load Graph" button.
 
+### Continue a project
+Whenever you made notable progress, save your graph via the "Save Graph" button. This creates a .json file that contains all information about your graph, including paths to images and settings for the GUI. When you want to continue working on your map, load this .json file via the "Load Graph" button at the top of the sidebar menu.
+
+### Create Task cards
+Task cards often have a different aspect ratio from the main board. Therefore, you may need a separate background image for them. You can load this image via the "Background image" file input in the sidebar menu. Then, you can switch to Task Export mode and export each task as an individual image file for printing.
+
+### Finish a project
+When you are finished with your map, you can export it as an image via the "Save img" button in the sidebar menu. You can use an external image editing program to add a score track, a legend and other details to the exported image or to your background image before exporting.
+Export your task cards via the Task Export mode as described above. There are options to export a single task card or export all of them. The latter can take several minutes.
+
+
+To prepare your exported board and task cards for printing, there are two scripts that fit the images to the printable area of A4 sheets and add crop marks. For this, you need to have LaTeX installed on your computer.
+
+#### `_split_board.py` 
+Splits a large board image into multiple smaller images and creates a .tex and .pdf file to print them. Occasionally, the automatic LaTeX compilation doesn't work. In that case, you can compile the .tex file like any other LaTeX document.  
+The `_split_board.py` script also takes into account the gaps that occur between printed sheets when they are glued onto separate parts of a folding board, specified as `inner_margin`.  
+See `folding patterns.png` for recommended way to arrange multiple sheets of paper for a folding board. See `board_margins_overview.png` for an explanation of the board splitting margins.
+
+#### `_prepare_task_cards.py`
+This script takes as input a folder of task card images and a single backside image. Then, it creates a .tex and .pdf file to print the task cards. Each page contains 4 task cards that can be folded in the middle to create the full card.
+
 ### Usage notes
 * There are some bugs regarding the edges (connections between nodes) where their internal values get messed up by some actions. Pressing "Repair Connection IDs" fixes this issue. "Show edge attractors" is a debug tool to see if a repair is necessary. If everything is working, this should show small arrows (or triangular arrow heads) that point from each end of an edge towards the nearest node or other edge. If you see any very long arrows, you should repair the connection IDs.
 
 * Occasionally, there are other bugs. Many of these can be fixed by switching to another mode (e.g. Graph View) and back.
+
+### What if I want to change x?
+* Change size of **edge rectangles** (e.g. to fit 1x3 LEGO bricks, Catan road pieces or original TTR pieces): You can open the particle graph .json file and use the search and replace function of your text editor to find and replace the edge size values. For this, you want to modify the `"bounding_box_size"` attribute of all `Particle_Edge` objects. You can search for:
+```
+        "bounding_box_size": [
+          3.36,
+          0.96
+        ],
+```
 
 ---
 ---
