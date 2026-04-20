@@ -348,9 +348,9 @@ class Board_Layout_GUI:
     Initialize variables for user inputs
     """
     # variables for user inputs
-    self.node_file = tk.StringVar(value="../../projects/example_project/example_files/locations.txt", name="node_file")
-    self.edge_file = tk.StringVar(value="../../projects/example_project/example_files/paths.txt", name="edge_file")
-    self.task_file = tk.StringVar(value="../../projects/example_project/example_files/tasks.txt", name="task_file")
+    self.node_file = tk.StringVar(value="../../projects/example_project/mapmaker_files/locations.txt", name="node_file")
+    self.edge_file = tk.StringVar(value="../../projects/example_project/mapmaker_files/paths.txt", name="edge_file")
+    self.task_file = tk.StringVar(value="../../projects/example_project/mapmaker_files/tasks.txt", name="task_file")
     self.background_file = tk.StringVar(value="", name="background_file")
     self.particle_graph_file = tk.StringVar(value="", name="particle_graph_file")
     self.edge_folder_path = tk.StringVar(value="./assets/edge_images", name="edge_folder_path")
