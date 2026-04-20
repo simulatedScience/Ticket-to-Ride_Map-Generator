@@ -348,9 +348,9 @@ class Board_Layout_GUI:
     Initialize variables for user inputs
     """
     # variables for user inputs
-    self.node_file = tk.StringVar(value="", name="node_file")
-    self.edge_file = tk.StringVar(value="", name="edge_file")
-    self.task_file = tk.StringVar(value="", name="task_file")
+    self.node_file = tk.StringVar(value="../../projects/example_project/example_files/locations.txt", name="node_file")
+    self.edge_file = tk.StringVar(value="../../projects/example_project/example_files/paths.txt", name="edge_file")
+    self.task_file = tk.StringVar(value="../../projects/example_project/example_files/tasks.txt", name="task_file")
     self.background_file = tk.StringVar(value="", name="background_file")
     self.particle_graph_file = tk.StringVar(value="", name="particle_graph_file")
     self.edge_folder_path = tk.StringVar(value="./assets/edge_images", name="edge_folder_path")
@@ -395,8 +395,8 @@ class Board_Layout_GUI:
     self.board_scale_factor = tk.DoubleVar(value=1., name="board_scale_factor")
     self.graph_positions_scale_factor = tk.DoubleVar(value=1.0, name="node_scale_factor")
     self.node_size = tk.DoubleVar(value=3.0, name="node_size")
-    self.label_font = tk.StringVar(value="assets/fonts/Stamp.ttf", name="label_font")
-    self.label_fontsize = tk.IntVar(value=120, name="label_fontsize")
+    self.label_font = tk.StringVar(value="", name="label_font")
+    self.label_fontsize = tk.IntVar(value=200, name="label_fontsize")
 
   def draw_control_widgets(self):
     """
@@ -630,7 +630,7 @@ class Board_Layout_GUI:
       self.load_files()
       toggle_file_input_submenu()
 
-    load_button = tk.Button(file_frame, text="Load", command=load_files_hide_menu)
+    load_button = tk.Button(file_frame, text="Load Graph", command=load_files_hide_menu)
     self.add_button_style(load_button)
     load_button.grid(
         row=row_index,
@@ -707,38 +707,38 @@ class Board_Layout_GUI:
     # reset graph data and clear graph
     self.reset_graph()
     # try loading particle graph
-    try:
-      self.particle_graph: TTR_Particle_Graph = TTR_Particle_Graph.load_json(self.particle_graph_file.get())
-      locations = self.particle_graph.get_locations()
-      paths = self.particle_graph.get_paths()
-      # set background image settings
-      bg_info: dict = self.particle_graph.get_bg_info()
-      self.background_file.set(bg_info["bg_image_path"])
-      self.load_background_image()
-      self.board_width.set(bg_info["bg_image_size"][0])
-      self.board_height.set(bg_info["bg_image_size"][1])
-      self.background_image_offset_x.set(bg_info["bg_image_offset"][0])
-      self.background_image_offset_y.set(bg_info["bg_image_offset"][1])
-      self.scale_background_image()
-      # set misc graph appearance settings
-      misc_info: dict = self.particle_graph.get_misc_info()
-      self.edge_folder_path.set(misc_info["edge_images_path"])
-      self.label_font.set(misc_info["label_font"])
-      self.label_fontsize.set(misc_info["label_fontsize"])
-      self.apply_label_settings()
-    except FileNotFoundError:
-      print("Particle graph file not found. Constructing new particle graph.")
-      # load node file (locations)
-      locations = ttr_reader.read_locations(self.node_file.get())
-      # load edge file (paths)
-      paths = ttr_reader.read_paths(self.edge_file.get())
-      # load task file (tasks)
-      tasks = ttr_reader.read_tasks(self.task_file.get())
+    # try:
+    self.particle_graph: TTR_Particle_Graph = TTR_Particle_Graph.load_json(self.particle_graph_file.get())
+    locations = self.particle_graph.get_locations()
+    paths = self.particle_graph.get_paths()
+    # set background image settings
+    bg_info: dict = self.particle_graph.get_bg_info()
+    self.background_file.set(bg_info["bg_image_path"])
+    self.load_background_image()
+    self.board_width.set(bg_info["bg_image_size"][0])
+    self.board_height.set(bg_info["bg_image_size"][1])
+    self.background_image_offset_x.set(bg_info["bg_image_offset"][0])
+    self.background_image_offset_y.set(bg_info["bg_image_offset"][1])
+    self.scale_background_image()
+    # set misc graph appearance settings
+    misc_info: dict = self.particle_graph.get_misc_info()
+    self.edge_folder_path.set(misc_info["edge_images_path"])
+    self.label_font.set(misc_info["label_font"])
+    self.label_fontsize.set(misc_info["label_fontsize"])
+    self.apply_label_settings()
+    # except FileNotFoundError as exception:
+    #   print("Particle graph file not found. Constructing new particle graph.")
+    #   # load node file (locations)
+    #   locations = ttr_reader.read_locations(self.node_file.get())
+    #   # load edge file (paths)
+    #   paths = ttr_reader.read_paths(self.edge_file.get())
+    #   # load task file (tasks)
+    #   tasks = ttr_reader.read_tasks(self.task_file.get())
 
-      self.graph_data = {
-        "locations": locations,
-        "paths": paths,
-        "tasks": tasks}
+    #   self.graph_data = {
+    #     "locations": locations,
+    #     "paths": paths,
+    #     "tasks": tasks}
     self.init_particle_graph()
 
     self.load_background_image()
@@ -748,7 +748,7 @@ class Board_Layout_GUI:
     load nodes from a txt file and add them to the particle graph. If no particle graph exists, create a new one.
     """
     # load node file (locations)
-    locations = ttr_reader.read_locations(self.node_file.get())
+    locations: list[str] = ttr_reader.read_locations(self.node_file.get())
     # if self.particle_graph is None:
     print(f"Creating new particle graph with {len(locations)} nodes.")
     self.graph_data = {
@@ -763,6 +763,23 @@ class Board_Layout_GUI:
 
     if self.show_nodes.get():
       self.particle_graph.draw_nodes(self.ax, movable=self.move_nodes_enabled.get())
+
+  def load_edges(self) -> None:
+    """
+    Load edges between nodes from a txt file and add them to the particle graph
+    """
+    # load edge file (paths)
+    paths: list[tuple[str, str, int]] = ttr_reader.read_paths(self.edge_file.get())
+    if self.particle_graph is None:
+      self.graph_data = {
+          "locations": [],
+          "paths": paths,
+          "tasks": {}}
+      print("Cannot initialize particle graph with just edges. No nodes specified.")
+    else:
+      self.graph_data["paths"] = paths
+      self.particle_graph.update_edges(paths)
+      print(f"successfully loaded {len(paths)} edges.")
 
   def load_tasks(self) -> None:
     """
@@ -1825,7 +1842,7 @@ class Board_Layout_GUI:
       if not self.graph_data["locations"]:
         print("No location data available. Cannot initialize graph.")
         return
-      print("new graph")
+      print("creating new graph")
       node_positions = self.init_node_positions()
       if self.particle_graph is not None:
         self.particle_graph.erase() # clear old graph from figure
@@ -1836,6 +1853,7 @@ class Board_Layout_GUI:
           node_positions = node_positions,
           # particle_parameters = self.get_particle_parameters(),
           color_config = self.color_config,
+          font_path = self.label_font.get(),
       )
     self.draw_graph()
 

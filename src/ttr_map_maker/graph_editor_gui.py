@@ -304,6 +304,7 @@ class Graph_Editor_GUI:
         color=self.color_config["label_text_color"],
         position=np.array([event.xdata, event.ydata]) + np.array([0, 2]),
         height_scale_factor=self.particle_graph.label_height_scale,
+        font_path=self.particle_graph.project_setup_dict["label_font"],
       )
       new_label.add_connected_particle(new_node)
       new_label.draw(

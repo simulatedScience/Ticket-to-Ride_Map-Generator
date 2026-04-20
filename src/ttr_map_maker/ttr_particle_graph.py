@@ -44,6 +44,7 @@ class TTR_Particle_Graph:
           "interaction_radius": 15,
           "repulsion_strength": 2,
         },
+        font_path: str = "",
         project_setup: dict = None,
         ):
     """
@@ -71,6 +72,7 @@ class TTR_Particle_Graph:
             "interaction_radius": 15,
             "repulsion_strength": 2,
           }.
+        font_path (str): font path override for label particles. If empty, the default font path from the project setup dict will be used. If no font is specified there, the default from `setup_project_dict()` will be used.
         project_setup (dict, optional): dictionary of project setup parameters, including bg image path, size, task export settings, etc. Defaults to None (create default setup)
     """
     self.color_config: dict = color_config
@@ -85,12 +87,12 @@ class TTR_Particle_Graph:
     # fill in missing keys with default values
     default_project_setup = self.setup_project_dict()
     for key in default_project_setup.keys():
-      if key not in self.project_setup_dict.keys():
+      if (key not in self.project_setup_dict.keys()) or (not self.project_setup_dict[key]):
         self.project_setup_dict[key] = default_project_setup[key]
+    if font_path: # override default font path if given as argument
+      self.project_setup_dict["label_font"] = font_path
     
     self.particle_parameters: dict = particle_parameters
-    self.node_labels: List[str] = locations # deleted after graph creation
-    self.node_positions: Dict[str, np.ndarray] = node_positions # deleted after graph creation
 
     self.max_particle_id = 0
 
@@ -99,11 +101,11 @@ class TTR_Particle_Graph:
     self.particle_labels: dict[str, Particle_Label] = dict()
     self.analysis_graph: TTR_Graph_Analysis = None
 
-    self.graph_extent: np.ndarray = np.array([0, 0, 0, 0], dtype=np.float16)
+    self.graph_extent: np.ndarray = np.array([0, "inf", 0, "inf"], dtype=np.float16) # (left, right, bottom, top)
 
     self.edge_attractor_artists: List[plt.Artist] = list()
     
-    self.create_particle_system()
+    self.create_particle_system(locations, node_positions)
 
 
   def setup_project_dict(self) -> dict:
@@ -146,7 +148,7 @@ class TTR_Particle_Graph:
             # card folder settings
             "task_card_folder_path": "",
           # other settings
-            "label_font": "assets/fonts/Stamp.ttf",
+            "label_font": "arial.ttf",
             "label_fontsize": 200,
             "edge_images_path": "assets/edge_images",
         #    }
@@ -287,16 +289,16 @@ class TTR_Particle_Graph:
         print(f"misc_settings: Ignoring unknown key {key}.")
 
 
-  def create_particle_system(self) -> None:
+  def create_particle_system(self, locations: list[str], node_positions: dict[str, np.ndarray]) -> None:
     """
     Create the particle system from the given locations and paths connecting them.
     """
     particle_id: int = self.max_particle_id + 1
-    self.label_height_scale: float = Particle_Label.get_label_height_scale(font_path=self.project_setup_dict.get("label_font", "assets/fonts/Stamp.ttf"))
-    n_nodes: int = len(self.node_labels)
-    for path_index, label in enumerate(self.node_labels):
-      if self.node_positions is not None:
-        position = self.node_positions[label]
+    self.label_height_scale: float = Particle_Label.get_label_height_scale(font_path=self.project_setup_dict.get("label_font"))
+    n_nodes: int = len(locations)
+    for path_index, label in enumerate(locations):
+      if label in node_positions:
+        position = node_positions[label]
       else:
         position = np.array([3*path_index, 0], dtype=np.float16)
       self.particle_nodes[label] = Particle_Node(
@@ -313,6 +315,7 @@ class TTR_Particle_Graph:
           label,
           id=particle_id+n_nodes,
           position=position,
+          font_path=self.project_setup_dict.get("label_font"),
           mass=self.particle_parameters["label_mass"],
           node_attraction=self.particle_parameters["node-label"],
           interaction_radius=self.particle_parameters["interaction_radius"],
@@ -330,9 +333,6 @@ class TTR_Particle_Graph:
     # create edges and add connections between particles
     for (location_1, location_2, length, color) in self.paths:
       self.add_connection(location_1, location_2, length, color)
-    
-    del self.node_positions
-    del self.node_labels
 
 
   def optimize_layout(self,
@@ -675,6 +675,18 @@ class TTR_Particle_Graph:
             repulsion_strength = 0, # particle_parameters["repulsion_strength"])
         )
 
+  def update_edges(self, new_edges: list[tuple[str, str, int, str]]) -> None:
+    """
+    update the list of edges saved in the particle graph.
+    The previous list of edges is overwritten.
+
+    Args:
+        new_edges (list[tuple[str, str, int, str]]): list of edges. Each edge is a tuple of (node_1, node_2, length, color)
+    """
+    self.paths = new_edges
+    self.particle_edges = dict()
+    for (loc1, loc2, length, color) in self.paths:
+      self.add_connection(loc1, loc2, length, color)
 
   def update_tasks(self, new_tasks: dict[str, TTR_Task]) -> None:
     """
@@ -773,6 +785,10 @@ class TTR_Particle_Graph:
         label_fontsize (int): font size
     """
     self.erase_labels()
+    if not label_font:
+      label_font = list(self.particle_labels.values())[0].font_path
+    if not label_fontsize:
+      label_fontsize = list(self.particle_labels.values())[0].fontsize
     self.label_height_scale = Particle_Label.get_label_height_scale(fontsize=label_fontsize, font_path=label_font)
     print(f"new label height scale: {self.label_height_scale}")
     for particle_label in self.particle_labels.values():

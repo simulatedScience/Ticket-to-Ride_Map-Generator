@@ -82,8 +82,10 @@ def add_card(
         flip_backside: bool = False,
         card_width: float = 88.9,
         card_height: float = 63.5,
+        image_rotation: int = 0,
         gap: float = 0.1,
-        vspace: float = 2.0):
+        vspace: float = 2.0,
+       ):
     """
     Adds a single card (front and back) to the document.
 
@@ -94,10 +96,19 @@ def add_card(
         flip_backside (bool): Whether to flip the back image.
         card_width (float): Width of the card in mm.
         card_height (float): Height of the card in mm.
+        image_rotation (int): 0, 90, 180 or 270 degrees counterclockwise
         gap (float): Gap between front and back in mm.
         vspace (float): Vertical space between cards in mm.
     """# Start tikzpicture for precise image placement
     doc.append(NoEscape(r'\begin{tikzpicture}[overlay, remember picture]'))
+
+    # Handle rotation: swap width and height if rotated 90 or 270
+    if image_rotation % 180 != 0:
+        display_width = card_height
+        display_height = card_width
+    else:
+        display_width = card_width
+        display_height = card_height
 
     # Adjust shifts to correct the positioning for the back image
     x_shift_back = x_pos + card_width / 2
@@ -106,12 +117,12 @@ def add_card(
     if flip_backside:
         doc.append(NoEscape(
             f'\\node[anchor=center,rotate=180] at ([xshift={x_shift_back}mm,yshift=-{y_shift_back}mm]current page.north west) '
-            f'{{\\includegraphics[height={card_height}mm,width={card_width}mm,keepaspectratio=FALSE]{{{back_path}}}}};'
+            f'{{\\includegraphics[height={display_height}mm,width={display_width}mm,keepaspectratio=FALSE,angle={image_rotation}]{{{back_path}}}}};'
         ))
     else:
         doc.append(NoEscape(
             f'\\node[anchor=center] at ([xshift={x_shift_back}mm,yshift=-{y_shift_back}mm]current page.north west) '
-            f'{{\\includegraphics[height={card_height}mm,width={card_width}mm,keepaspectratio=FALSE]{{{back_path}}}}};'
+            f'{{\\includegraphics[height={display_height}mm,width={display_width}mm,keepaspectratio=FALSE,angle={-image_rotation}]{{{back_path}}}}};'
         ))
 
     # Adjust shifts to correct the positioning for the front image
@@ -120,7 +131,7 @@ def add_card(
 
     doc.append(NoEscape(
         f'\\node[anchor=center] at ([xshift={x_shift_front}mm,yshift=-{y_shift_front}mm]current page.north west) '
-        f'{{\\includegraphics[height={card_height}mm,width={card_width}mm,keepaspectratio=FALSE]{{{front_path}}}}};'
+        f'{{\\includegraphics[height={display_height}mm,width={display_width}mm,keepaspectratio=FALSE,angle={image_rotation}]{{{front_path}}}}};'
     ))
 
     # End tikzpicture
@@ -136,6 +147,7 @@ def generate_latex_document(
         target_filepath: str = "debug_graph/task_cards/task_cards",
         card_width: float = 91,
         card_height: float = 65,
+        image_rotation: int = 0,
         border: Tuple[float, float] = (10, 10),
         vspace: float = 2.0,
         gap: float = 0.1,
@@ -147,6 +159,10 @@ def generate_latex_document(
         fronts (List[str]): List of file paths for the front images.
         back (str): File path for the back image.
         flip_backside (bool): Whether to flip the back image.
+        target_filepath (str): File path to save the generated LaTeX document.
+        card_width (float): Width of the cards in mm. Defaults to 91.0.
+        card_height (float): Height of the cards in mm. Defaults to 65.0.
+        image_rotation (int): Rotation angle for the images in degrees counterclockwise. Defaults to 0.
         border (Tuple[float, float]): Vertical and horizontal borders in cm.
         vspace (float): Vertical space between cards in mm.
 
@@ -176,7 +192,9 @@ def generate_latex_document(
             card_width=card_width,
             card_height=card_height,
             gap=gap,
-            vspace=vspace)
+            vspace=vspace,
+            image_rotation=image_rotation,
+        )
         add_horizontal_crop_marks(
             doc,
             x_pos=x_pos,
@@ -211,6 +229,7 @@ def task_cards_to_latex(
         flip_backside: bool = False,
         card_height: float = 65.0,
         card_width: float = 91.0,
+        image_rotation: int = 0.0,
         target_filepath: str = None):
     """
 
@@ -218,8 +237,9 @@ def task_cards_to_latex(
     Args:
         front_images (list[str]): 
         back_image (str): 
-        card_height (float, optional): 
-        card_width (float, optional): 
+        card_height (float, optional): Height of the cards in mm. Defaults to 65.0.
+        card_width (float, optional): Width of the cards in mm. Defaults to 91.0.
+        image_rotation (int, optional): 0, 90, 180 or 270 (degrees counterclockwise)
         flip_backside (bool, optional): 
     """
     tk.Tk().withdraw()
@@ -247,6 +267,7 @@ def task_cards_to_latex(
         target_filepath=target_filepath,
         card_width=card_width,
         card_height=card_height,
+        image_rotation=image_rotation,
     )
     print(f"Generated LaTeX document at {filepath}.tex")
     # Compile to pdf
@@ -259,8 +280,25 @@ def task_cards_to_latex(
 
 
 if __name__ == "__main__":
-    # Example usage
-    task_cards_to_latex(flip_backside=False)
+    # # Example usage (to fill slim fit sleeves for standard size cards)
+    # card_height: float = 88.4
+    # card_width: float = 63.0
+    # card_height, card_width = card_width, card_height # swap for landscape
+    # task_cards_to_latex(
+    #     card_height=card_height,
+    #     card_width=card_width,
+    #     image_rotation=0, # horizontal images
+    #     flip_backside=False,
+    #     )
+    # Example usage (to fill regular fit sleeves for standard size cards)
+    card_width: float = 65.0
+    card_height, card_width = card_width, card_height
+    task_cards_to_latex(
+        card_height=card_height,
+        card_width=card_width,
+        image_rotation=90,
+        flip_backside=True,
+        )
     # front_images = ["img1.png", "img1.png", "img1.png", "img1.png", "img1.png"]
     # back_image = "back.png"
     # generate_latex_document(front_images, back_image, flip_backside=False)

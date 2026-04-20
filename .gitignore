@@ -24,6 +24,7 @@ src/tickets_ai-modulated_delay
 
 # keep some examples
 !projects/**/
+!projects/example_project/**
 !projects/Star_Wars_TTR/final_board_4k.png
 # program files for graph
 !projects/Star_Wars_TTR/mapmaker_files/star_wars_ttr_graph_v2.15_board_export.json
@@ -51,3 +52,5 @@ src/tickets_ai-modulated_delay
 *.stl
 *.skp
 *.svg
+/src/ttr_map_maker/.vscode
+*.ffs_db

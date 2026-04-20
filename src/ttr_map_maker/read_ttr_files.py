@@ -17,13 +17,13 @@ def read_locations(location_file: str) -> list[str]:
   Args:
       location_file (str): path to the location file
   """
-  locations = []
+  locations: list[str] = []
   try:
-    with open(location_file, "r") as loc_file:
+    with open(location_file, "r", encoding="utf-8") as loc_file:
       for line in loc_file:
         line = line.strip()
         if line: # skip empty lines
-          locations.append(line)
+          locations.append(line.replace("\\n", "\n")) # append location name, preserving newlines
   except FileNotFoundError:
     print(f"Warning: could not read locations from {location_file}")
   return locations
@@ -41,12 +41,14 @@ def read_paths(path_file: str):
   """
   paths = []
   try:
-    with open(path_file, "r") as path_file:
+    with open(path_file, "r", encoding="utf-8") as path_file:
       for line in path_file:
         line = line.strip()
         if line:
-          loc_id1, loc_id2, length, color = line.split(" ; ")
-          paths.append((loc_id1, loc_id2, int(length), color))
+          loc_1, loc_2, length, color = line.split(" ; ")
+          loc_1 = loc_1.replace("\\n", "\n")
+          loc_2 = loc_2.replace("\\n", "\n")
+          paths.append((loc_1, loc_2, int(length), color))
   except FileNotFoundError:
     print(f"Warning: could not read paths from {path_file}")
   return paths
@@ -64,11 +66,13 @@ def read_tasks(task_filepath: str) -> dict[str, TTR_Task]:
   """
   tasks: dict[str, TTR_Task] = {}
   try:
-    with open(task_filepath, "r") as task_file:
+    with open(task_filepath, "r", encoding="utf-8") as task_file:
       for line in task_file:
         line = line.strip()
         if line:
           loc_1, loc_2, *length = line.split(" ; ")
+          loc_1 = loc_1.replace("\\n", "\n")
+          loc_2 = loc_2.replace("\\n", "\n")
           task = TTR_Task(node_names=[loc_1, loc_2])
           tasks[task.name] = task
   except FileNotFoundError:

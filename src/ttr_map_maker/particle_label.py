@@ -30,7 +30,6 @@ class Particle_Label(Graph_Particle):
         angular_velocity_decay: float = 0.9999,
         repulsion_strength: float = 0,
         fontsize: int = 250,
-        font_name: str = None,
         # font_path: str = "assets\\fonts\\MiddleEarth.ttf",
         # font_path: str = "assets\\fonts\\ringbearer.ttf",
         font_path: str = None,
@@ -45,7 +44,6 @@ class Particle_Label(Graph_Particle):
         id (int): unique numeric id of the particle
         position (np.ndarray, optional): position of the particle. Defaults to np.array([0, 0]).
         fontsize (int, optional): fontsize of the label. Defaults to 20.
-        font_name (str, optional): name of the font. Defaults to None.
         font_path (str, optional): path to the font file as `.ttf`. This is only used  Defaults to "beleriand_ttr\\MiddleEarth.ttf".
         height_scale_factor (float, optional) # TODO: complete docstring Args
     """
@@ -63,22 +61,23 @@ class Particle_Label(Graph_Particle):
     # self.inside_stroke_width = fontsize // 25
     self.inside_stroke_width = fontsize // 75
     self.outline_stroke_width = fontsize // 8
-    if font_name is None and font_path is None:
-      font_path = "assets/fonts/Stamp.ttf"
-    if font_name is None:
-      # font_name = font_path.split("\\")[-1].strip(".ttf")
-      fontManager.addfont(font_path)
-      width, height, pix_width, pix_height, *offset = self._get_label_size(
-          label = label,
-          fontsize = fontsize,
-          font = font_path)
-      self.font_name = font_path
-    else:
-      width, height, pix_width, pix_height, *offset = self._get_label_size(
-          label = label,
-          fontsize = fontsize,
-          font = font_name)
-      self.font_name = font_name
+    # if font_name is None and font_path is None:
+    #   font_path = "assets/fonts/Stamp.ttf"
+    # if font_name is None:
+    #   # font_name = font_path.split("\\")[-1].strip(".ttf")
+    #   fontManager.addfont(font_path)
+    #   width, height, pix_width, pix_height, *offset = self._get_label_size(
+    #       label = label,
+    #       fontsize = fontsize,
+    #       font = font_path)
+    #   self.font_name = font_path
+    # else:
+    self.font_path = font_path
+    width, height, pix_width, pix_height, *offset = self._get_label_size(
+        label = label,
+        fontsize = fontsize,
+        font = font_path)
+    # self.font_name = font_name
     super().__init__(
         id,
         position=position,
@@ -346,8 +345,7 @@ class Particle_Label(Graph_Particle):
 
 
   def get_label_height_scale(
-      fontsize: int = 250,
-      font_name: str = None,
+      fontsize: int = 200,
       font_path: str = None) -> float:
       # font_path: str = "beleriand_ttr\\MiddleEarth.ttf") -> float:
     """
@@ -356,22 +354,27 @@ class Particle_Label(Graph_Particle):
 
     Args:
         fontsize (int, optional): font size to use. Defaults to 200.
-        font_name (str, optional): font to use if it is a default font Leave this as None when using a custom font. Defaults to None.
-        font_name (str, optional): font to use if it is a default font Leave this as None when using a custom font. Defaults to None.
-        font_path (str, optional): path to a custom font to use (as ttf file). Defaults to "beleriand_ttr\MiddleEarth.ttf".
+        font (str, optional): path to a custom font to use (as ttf file). Defaults to "beleriand_ttr\MiddleEarth.ttf".
 
     Returns:
         float: scale factor to use such that no label will have height >1. Labels without vertically large letters may be smaller, but the displayed text will have the same size for all labels.
     """
-    if font_name is None and font_path is None:
-      font_name = "assets/fonts/Stamp.ttf"
-    # load image_font from file
-    if font_name is None:
+    if ".ttf" in font_path:
+      # load truetype font from file
       img_font = ImageFont.truetype(font_path, fontsize)
     else:
       # load installed font
-      img_font = ImageFont.load(font_name)
+      img_font = ImageFont.load(font_path)
       img_font.set_size(fontsize)
+    # if not font_name and not font_path:
+    #   font_path = "Stamp.ttf"
+    # # load image_font from file
+    # if font_path and not font_name:
+    #   img_font = ImageFont.truetype(font_path, fontsize)
+    # else:
+    #   # load installed font
+    #   img_font = ImageFont.load(font_name)
+    #   img_font.set_size(fontsize)
     # determine sroke widths
     text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ-abcdefghijklmnopqrstuvwxyz_0123456789"
     outline_stroke_width = fontsize // 8
@@ -393,7 +396,6 @@ class Particle_Label(Graph_Particle):
     particle_info["label"] = self.label
     particle_info["color"] = self.color
     particle_info["fontsize"] = self.fontsize
-    particle_info["font_name"] = self.font_name
     particle_info["node_attraction"] = self.node_attraction
     particle_info["height_scale_factor"] = self.height_scale_factor
     return particle_info
