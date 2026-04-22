@@ -320,7 +320,7 @@ class Board_Layout_GUI:
       self.ax = self.fig.add_subplot(111)
       self.ax.set_facecolor(self.color_config["plot_bg_color"])
       # hide frame, axis and ticks
-      self.ax.axis("scaled")
+      self.ax.axis("equal")
 
   def control_frame_size_update(self, event: tk.Event, control_outer_frame: tk.Frame):
     """
@@ -776,10 +776,11 @@ class Board_Layout_GUI:
           "paths": paths,
           "tasks": {}}
       print("Cannot initialize particle graph with just edges. No nodes specified.")
-    else:
-      self.graph_data["paths"] = paths
-      self.particle_graph.update_edges(paths)
-      print(f"successfully loaded {len(paths)} edges.")
+      return
+    self.graph_data["paths"] = paths
+    self.particle_graph.update_edges(paths)
+    print(f"successfully loaded {len(paths)} edges.")
+    self.update_edge_style()
 
   def load_tasks(self) -> None:
     """
@@ -1090,10 +1091,8 @@ class Board_Layout_GUI:
     if self.particle_graph is None:
       return
     if self.show_edge_attractors.get():
-      print("draw edge attractors")
       self.particle_graph.draw_edge_attractors(self.ax)
     else:
-      print("hide edge attractors")
       self.particle_graph.erase_edge_attractors()
     self.canvas.draw_idle()
 

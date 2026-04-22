@@ -267,6 +267,7 @@ class Particle_Edge(Graph_Particle):
       corner_1 = self.bounding_box[i]
       corner_2 = self.bounding_box[(i + 1) % 4]
       if np.linalg.norm(corner_1 - corner_2) - np.min(self.bounding_box_size) < eps:
+        # check if corner_1 - corner_2 are a short edge of the bounding box.
         midpoints[found_n_shortest_edges, :] = (corner_1 + corner_2) / 2
         found_n_shortest_edges += 1
         if found_n_shortest_edges == 2:

@@ -329,6 +329,7 @@ class TTR_Particle_Graph:
       particle_id += 1
       # print(f"node position {label}: {self.particle_nodes[label].position}")
       # print(f"label position {label}: {self.particle_labels[label].position}")
+    self.max_particle_id = n_nodes * 2
 
     # create edges and add connections between particles
     for (location_1, location_2, length, color) in self.paths:
@@ -974,12 +975,15 @@ class TTR_Particle_Graph:
         # arrow_length = np.linalg.norm(anchor_2-anchor_1)
         # if arrow_length > max(particle_edge.bounding_box_size):
         #   print(f"Warning: edge attractor is unusually long between particles: {particle_edge.id} and {connected_particle.id} ({arrow_length} cm).")
+        # normalize force
+        if np.linalg.norm(force_1) > 0:
+          force_1 = force_1 / np.linalg.norm(force_1) * 0.8
         self.edge_attractor_artists.append(
           ax.arrow(
             anchor_1[0],
             anchor_1[1],
-            3*force_1[0],
-            3*force_1[1],
+            force_1[0],
+            force_1[1],
             color="#222222",
             alpha=alpha,
             width=0.1,
@@ -987,6 +991,7 @@ class TTR_Particle_Graph:
             head_width=0.3,
             head_length=0.4,
             zorder=0))
+        # print(f"Drew edge attractor between particles: {particle_edge.id} and {connected_particle.id} at anchor {anchor_1}.")
 
   def erase_edge_attractors(self) -> None:
     """

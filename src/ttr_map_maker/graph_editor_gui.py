@@ -709,10 +709,10 @@ class Graph_Editor_GUI:
     """
     if self.pick_event_cid is not None:
       self.canvas.mpl_disconnect(self.pick_event_cid)
-      print(f"disconnecting pick event")
+      # print(f"disconnecting pick event")
     if self.release_event_cid is not None:
       self.canvas.mpl_disconnect(self.release_event_cid)
-      print(f"disconnecting release event")
+      # print(f"disconnecting release event")
     self.pick_event_cid: int = None
     del self.drag_handler
     self.drag_handler: Drag_Handler = None
@@ -757,7 +757,7 @@ class Graph_Editor_GUI:
     self.preselected_particle: Graph_Particle = particle
     self.release_event_cid: int = self.canvas.mpl_connect("button_release_event", self.on_mouse_release)
     self.canvas.mpl_disconnect(self.pick_event_cid)
-    print(f"disconnecting pick event")
+    # print(f"disconnecting pick event")
 
 
   def on_mouse_release(self, event: MouseEvent):
@@ -767,7 +767,7 @@ class Graph_Editor_GUI:
     Then rebind the mouse click event.
     """
     self.canvas.mpl_disconnect(self.release_event_cid)
-    print(f"disconnecting release event")
+    # print(f"disconnecting release event")
     self.release_event_cid = None
     # if a particle was clicked, select it
     self.select_particle(self.preselected_particle, add_to_selection=self.add_edge_mode)
@@ -846,7 +846,7 @@ class Graph_Editor_GUI:
     # unbind mouse events
     if self.release_event_cid is not None:
       self.canvas.mpl_disconnect(self.release_event_cid)
-      print(f"disconnecting release event")
+      # print(f"disconnecting release event")
       self.release_event_cid = None
     # if self.pick_event_cid is not None:
     #   self.canvas.mpl_disconnect(self.pick_event_cid)
