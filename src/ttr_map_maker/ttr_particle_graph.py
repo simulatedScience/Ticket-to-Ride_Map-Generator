@@ -1566,7 +1566,7 @@ class TTR_Particle_Graph:
       elif particle_type == "Particle_Label":
         particle_info.pop("bounding_box_size")
         particle_info.pop("target_position")
-        particle = Particle_Label(**particle_info)
+        particle = Particle_Label(**particle_info, font_path=particle_graph.project_setup_dict["label_font"])
         particle_graph.add_particle(particle)
       # add connected particles back to particle info
       particle_info["connected_particles"] = connected_particles

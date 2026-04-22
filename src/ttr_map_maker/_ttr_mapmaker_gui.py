@@ -1219,9 +1219,9 @@ class Board_Layout_GUI:
     if filepath == "":
       return
     self.particle_graph.set_misc_info(
-        edge_images_path=self.edge_folder_path.get(),
-        label_font=self.label_font.get(),
-        label_fontsize=self.label_fontsize.get(),
+        edge_images_path=self.particle_graph.project_setup_dict["edge_images_path"],
+        label_font=self.particle_graph.project_setup_dict["label_font"],
+        label_fontsize=self.particle_graph.project_setup_dict["label_fontsize"],
     )
     self.particle_graph.save_json(filepath)
   
